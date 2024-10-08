@@ -26,15 +26,37 @@ class TaskService
             return false;
         }
     }
-    public function update(Task $task, array $data)
+    public function update($task, $param)
     {
+        $param['status'] = 100;
+        return $task->update($param);
+    }
 
-        try {
+    public function findId($id)
+    {
+        return Task::find($id);
+    }
 
-            $task->update($data);
-            return $task;
-        } catch (\Exception $e) {
-            return false;
-        }
+    public function softDelete($task)
+    {
+        return $task->delete();
+    }
+
+
+    public function findIdSoftDelete($id)
+    {
+        return Task::withTrashed()->where("id", $id)->first();
+    }
+
+    public function restore($task)
+    {
+        return $task->restore();
+    }
+
+
+    public function pagination($limit)
+    {
+        return Task::select("name", "description", "status")
+            ->paginate($limit);
     }
 }

@@ -42,7 +42,7 @@ class TaskController extends Controller
     {
         return new TaskResource($task);
     }
-    public function update(UpdateRequest $updateRequest, Task $task)
+    public function update(Task $task, UpdateRequest $updateRequest)
     {
         // Lấy dữ liệu đã được xác thực
         $request = $updateRequest->validated();
@@ -50,14 +50,45 @@ class TaskController extends Controller
         // Gọi đến service để cập nhật task
 
         $result = $this->taskService->update($task, $request);
-
         if ($result) {
 
-            return new TaskResource($result); // Trả về dữ liệu sau khi cập nhật thành công
+            return response()->json([
+                'message' => 'cap nhat thanh cong'
+            ]); // Trả về dữ liệu sau khi cập nhật thành công
         }
 
         return response()->json([
-            'message' => 'error in updating task'
+            'message' => 'cap nhat loi'
         ]);
+    }
+
+    // Phương thức xóa mềm
+    public function delete($id): JsonResponse
+    {
+        $task = $this->taskService->findId($id);
+
+        if (!$task) {
+            return response()->json(['message' => 'Dữ liệu không tồn tại'], 200, [], JSON_UNESCAPED_UNICODE);
+        }
+
+        $result = $this->taskService->softDelete($task);
+
+        if ($result) {
+            return response()->json(['message' => 'Xoá dữ liệu thành công'], 200, [], JSON_UNESCAPED_UNICODE);
+        }
+        return response()->json(['message' => 'Xoá dữ liệu không thành công'], 200, [], JSON_UNESCAPED_UNICODE);
+    }
+
+
+    public function restore($id)
+    {
+        $task = $this->taskService->findIdSoftDelete($id);
+
+        $result = $this->taskService->restore($task);
+        if ($result) {
+            return response()->json(['message' => 'Khôi phục dữ liệu thành công'], 200, [], JSON_UNESCAPED_UNICODE);
+        }
+
+        return response()->json(['message' => 'Khôi phục dữ liệu không thành công'], 200, [], JSON_UNESCAPED_UNICODE);
     }
 }
